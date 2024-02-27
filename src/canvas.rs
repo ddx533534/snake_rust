@@ -15,7 +15,7 @@ pub struct Canvas {
 
 impl Canvas {
     pub fn default() -> Canvas {
-        Canvas { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT / 4 }
+        Canvas { width: DEFAULT_WIDTH / 3, height: DEFAULT_HEIGHT / 4 }
     }
     pub fn new(width: i32, height: i32) -> Result<Canvas, Box<dyn Error>> {
         if width > MAX_SIZE || width < MIN_SIZE {

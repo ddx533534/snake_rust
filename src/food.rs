@@ -3,7 +3,8 @@ use rand::Rng;
 use crate::canvas::Canvas;
 use crate::error::GameError;
 use crate::snake::Snake;
-#[derive(Debug)]
+
+#[derive(Debug, Clone)]
 pub struct Food {
     pub position: (i32, i32),
 }
@@ -25,13 +26,13 @@ impl Food {
 
     pub fn generate_new_food(canvas: &Canvas, snake: &Snake) -> Food {
         let mut random = rand::thread_rng();
-        let mut food = Food { position: (random.gen_range(0..=canvas.width), random.gen_range(0..=canvas.height)) };
+        let mut food = Food { position: (random.gen_range(0..canvas.width), random.gen_range(0..canvas.height)) };
 
         loop {
             if !snake.body.contains(&food.position) {
                 return food;
             }
-            food = Food { position: (random.gen_range(0..=canvas.width), random.gen_range(0..=canvas.height)) }
+            food = Food { position: (random.gen_range(0..canvas.width), random.gen_range(0..canvas.height)) }
         }
     }
 }

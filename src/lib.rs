@@ -11,12 +11,10 @@ pub mod snake_game {
     pub fn run() {
         let mut game_info = initial_game();
         game_info.format_output();
-        start_game(game_info).expect("start game error!");
+        start_game(game_info).expect("Game Over!");
     }
 
     pub fn initial_game() -> GameInfo { GameInfo::default() }
 
-    pub fn start_game(mut game_info: GameInfo) -> Result<bool, Box<dyn Error>> {
-        game_info.start()
-    }
+    pub fn start_game(mut game_info: GameInfo) -> Result<bool, Box<dyn Error>> { game_info.start() }
 }

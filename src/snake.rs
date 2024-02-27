@@ -38,9 +38,9 @@ pub struct Snake {
     // 蛇身，由许多个点坐标构成
     pub body: Vec<(i32, i32)>,
     // 速率
-    rate: i32,
+    pub rate: i32,
     // 方向
-    direction: Direction,
+    pub direction: Direction,
 }
 
 pub trait Move {
@@ -53,9 +53,9 @@ impl Snake {
     pub fn default(canvas: &Canvas, food: &Food) -> Snake {
         let mut body = Vec::new();
         let mut random = rand::thread_rng();
-        let mut res = (random.gen_range(0..=canvas.width - 1), random.gen_range(0..=canvas.height - 1));
+        let mut res = (random.gen_range(0..canvas.width), random.gen_range(0..canvas.height));
         while res == food.position {
-            res = (random.gen_range(0..=canvas.width - 1), random.gen_range(0..=canvas.height - 1));
+            res = (random.gen_range(0..canvas.width), random.gen_range(0..canvas.height));
         }
         body.push(res);
         Snake { body, rate: MIN_RATE, direction: Direction::Right }
@@ -77,13 +77,13 @@ impl Move for Snake {
         let times = rate / BASE_RATE;
         let mut body = &mut self.body;
         let mut head = body[0];
+        let mut tail = body[body.len() - 1].clone();
         for e in 0..times {
-            if body.len()>1 {
-                for i in body.len() - 1..1 {
+            if body.len() > 1 {
+                for i in (1..body.len()).rev() {
                     body[i] = body[i - 1];
                 }
             }
-
             match self.direction {
                 Direction::Right => {
                     head.0 += rate;
@@ -92,16 +92,24 @@ impl Move for Snake {
                     head.0 -= rate;
                 }
                 Direction::Up => {
-                    head.1 += rate;
-                }
-                Direction::Down => {
                     head.1 -= rate;
                 }
+                Direction::Down => {
+                    head.1 += rate;
+                }
             }
+            if body.contains(&head) {
+                println!("oh no eat your self!");
+                return Err(Box::new(GameError::CircleError(String::from("oh no eat your self!"))));
+            }
+            body[0] = head;
             if head == food.position {
+                println!("eat food!");
+                body.push(tail);
                 return Ok(true);
             }
-            if head.0 > canvas.width || head.0 < 0 || head.1 > canvas.height || head.1 < 0 {
+            if head.0 >= canvas.width || head.0 < 0 || head.1 >= canvas.height || head.1 < 0 {
+                println!("oh no hit the wall!");
                 return Err(Box::new(GameError::OutOfBounds(String::from("oh no hit the wall!"))));
             }
         }
@@ -110,14 +118,13 @@ impl Move for Snake {
 
 
     fn turn(&mut self, direction: Direction) -> Result<bool, Box<dyn Error>> {
-        if Direction::is_direction_opposite(&self.direction, &direction) {
+        return if Direction::is_direction_opposite(&self.direction, &direction) {
             // invalid, can't step back!
-        } else if Direction::is_direction_same(&self.direction, &direction) {
-            // invalid, direction is already same!
+            Ok(false)
         } else {
             self.direction = direction;
-        }
-        Ok(true)
+            Ok(true)
+        };
     }
 
     fn change_rate(&mut self, rate: i32) -> Result<bool, Box<dyn Error>> {
